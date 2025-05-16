@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold">Kelgusi tadbirlar</h2>
+    {% if user.is_authenticated and user.role == "organizer" and user.is_organizer %}
+        <a href="{% url 'events:create-event' %}" class="btn btn-primary">Tadbir qo'shish</a>
+    {% endif %}
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+{% if events %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for event in events %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ event.title }}</h5>
+                    <p class="card-text"><strong>Tashkilotchi:</strong> {{ event.organizing_company }}</p>
+                    <a href="{% url 'events:detail-event' event.slug %}" class="btn btn-outline-primary btn-sm">Batafsil</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info mt-4" role="alert">
+        Hozircha tadbirlar mavjud emas.
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card mb-4 shadow-sm">
+  <div class="card-body">
+    <h3 class="card-title mb-3">{{ object.title }}</h3>
+
+    {% if object.image %}
+      <img src="{{ object.image.url }}" alt="Event Image" class="img-fluid rounded mb-4" style="max-height: 400px; object-fit: cover;">
+    {% endif %}
+
+    <ul class="list-group mb-3">
+      <li class="list-group-item"><strong>Tadbir haqida:</strong> {{ object.description }}</li>
+      <li class="list-group-item"><strong>Tashkilotchi:</strong> {{ object.organizing_company }}</li>
+      <li class="list-group-item"><strong>Manzil:</strong> {{ object.location }}</li>
+      <li class="list-group-item"><strong>Boshlanish vaqti:</strong> {{ object.start_time }}</li>
+      <li class="list-group-item"><strong>Tugash vaqti:</strong> {{ object.end_time }}</li>
+      <li class="list-group-item"><strong>Joylar soni:</strong> {{ object.max_participants }}</li>
+    </ul>
+
+    <p><strong>Mavjud joylar soni:</strong> {{ available_spots }}</p>
+    <p><strong>Holati:</strong> {{ object.status }}</p>
+
+    {% if object.organizer == request.user %}
+      <div class="mb-3">
+        <a href="{% url 'events:update-event' object.slug %}" class="btn btn-outline-primary me-2">Yangilash</a>
+        <a href="{% url 'events:delete-event' object.pk %}" class="btn btn-outline-danger">O'chirish</a>
+      </div>
+    {% endif %}
+
+    {% if user.is_authenticated and user.role == 'participant' %}
+      {% if user_registration_status == "confirmed" %}
+        <div class="alert alert-success d-flex align-items-center" role="alert">
+          <i class="bi bi-check-circle-fill me-2"></i>
+          Sizning tadbirda ishtirok etishingiz tasdiqlandi.
+        </div>
+
+        {% if available_spots == 0 %}
+          <div class="alert alert-danger">Joylar mavjud emas.</div>
+        {% endif %}
+
+        <a href="{{ cancel_link }}" class="btn btn-outline-danger mt-2">Bekor qilish</a>
+
+      {% elif user_registration_status == "pending" %}
+        <div class="alert alert-warning d-flex align-items-center" role="alert">
+          <i class="bi bi-clock-fill me-2"></i>
+          Siz ro‘yxatdan o‘tgansiz, lekin hali tasdiqlamadingiz.
+        </div>
+
+      {% elif user_registration_status == "not_registered" %}
+        {% if available_spots > 0 %}
+          <form method="post" action="{% url 'events:register-for-event' object.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Ro‘yxatdan o‘tish</button>
+          </form>
+        {% else %}
+          <div class="alert alert-danger">Joylar mavjud emas. Ro'yxatdan o'tish to'xtatildi.</div>
+        {% endif %}
+      {% endif %}
+    {% else %}
+      <p class="text-muted">Ro‘yxatdan o‘tish uchun tizimga kiring.</p>
+    {% endif %}
+
+    <a href="{% url 'home' %}" class="btn btn-secondary mt-3">Orqaga</a>
+  </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+{% endblock %}
